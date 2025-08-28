@@ -12,6 +12,12 @@ on:
         options:
           - jdcloud_ipq60xx_immwrt
           - jdcloud_ipq60xx_libwrt
+          
+  workflow_call: 
+    inputs:
+      model:
+        required: true
+        type: string
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
