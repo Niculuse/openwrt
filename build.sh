@@ -51,6 +51,9 @@ apply_config() {
 
     # 追加代理配置
     cat "$BASE_PATH/deconfig/proxy.config" >> "$BASE_PATH/$BUILD_DIR/.config"
+
+    # 追加busybox自定义配置
+    cat "$BASE_PATH/deconfig/busybox.config" >> "$BASE_PATH/$BUILD_DIR/.config"
 }
 
 REPO_URL=$(read_ini_by_key "REPO_URL")
