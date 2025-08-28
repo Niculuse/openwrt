@@ -98,7 +98,7 @@ remove_unwanted_packages() {
         "haproxy" "xray-core" "xray-plugin" "dns2socks" "alist" "hysteria"
         "mosdns" "adguardhome" "ddns-go" "naiveproxy" "shadowsocks-rust"
         "sing-box" "v2ray-core" "v2ray-geodata" "v2ray-plugin" "tuic-client"
-        "chinadns-ng" "ipt2socks" "tcping" "trojan-plus" "simple-obfs" "shadowsocksr-libev" 
+        "chinadns-ng" "ipt2socks" "tcping" "trojan-plus" "simple-obfs" "shadowsocksr-libev"
         "dae" "daed" "mihomo" "geoview" "tailscale" "open-app-filter" "msd_lite"
     )
     local packages_utils=(
@@ -308,8 +308,14 @@ fix_hash_value() {
 apply_hash_fixes() {
     fix_hash_value \
         "$BUILD_DIR/package/feeds/packages/smartdns/Makefile" \
-        "150019a03f1ec2e4b5849740a72badf5ea094d5754bd59dd30119523a3ce9398" \
-        "abcb3d3bfa99297dfb92b8fb4f1f78d0948a01281fdfc76c9c460a2c3d5c7f79" \
+        "a7edb052fea61418c91c7a052f7eb1478fe6d844aec5e3eda0f2fcf82de29a10" \
+        "b11e175970e08115fe3b0d7a543fa8d3a6239d3c24eeecfd8cfd2fef3f52c6c9" \
+        "smartdns"
+
+    fix_hash_value \
+        "$BUILD_DIR/package/feeds/packages/smartdns/Makefile" \
+        "a1c084dcc4fb7f87641d706b70168fc3c159f60f37d4b7eac6089ae68f0a18a1" \
+        "ab7d303a538871ae4a70ead2e90d35e24fcc36bc20f5b6c5d963a3e283ea43b1" \
         "smartdns"
 }
 
@@ -877,6 +883,45 @@ add_quickfile() {
     fi
 }
 
+add_bandix() {
+    local repo_url_core="https://github.com/timsaya/openwrt-bandix.git"
+    local target_dir_core="$BUILD_DIR/package/openwrt-bandix"
+
+    if [ -d "$target_dir_core" ]; then
+        rm -rf "$target_dir_core"
+    fi
+    echo "正在添加 openwrt-bandix..."
+    if ! git clone --depth 1 "$repo_url_core" "$target_dir_core"; then
+        echo "错误：从 $repo_url_core 克隆 openwrt-bandix 仓库失败" >&2
+        exit 1
+    fi
+
+#    local makefile_path_core="$target_dir_core/Makefile"
+#    if [ -f "$makefile_path_core" ]; then
+#        # 在 "define Package/$(PKG_NAME)" 后面加 DEFAULT:=y
+#        sed -i 's|^define Package/$(PKG_NAME)$|define Package/$(PKG_NAME)\n        DEFAULT:=y|' "$makefile_path_core"
+#    fi
+
+    local repo_url_luci="https://github.com/timsaya/luci-app-bandix.git"
+    local target_dir_luci="$BUILD_DIR/package/feeds/luci/luci-app-bandix"
+
+    if [ -d "$target_dir_luci" ]; then
+        rm -rf "$target_dir_luci"
+    fi
+    echo "正在添加 luci-app-bandix..."
+    if ! git clone --depth 1 "$repo_url_luci" "$target_dir_luci"; then
+        echo "错误：从 $repo_url_luci 克隆 luci-app-bandix 仓库失败" >&2
+        exit 1
+    fi
+
+    local makefile_path_luci="$target_dir_luci/Makefile"
+    if [ -f "$makefile_path_luci" ]; then
+        # 在 PKG_RELEASE:=1 后面加 DEFAULT:=y
+        sed -i '/^PKG_RELEASE:=1$/a DEFAULT:=y' "$makefile_path_luci"
+    fi
+}
+
+
 # 设置 Nginx 默认配置
 set_nginx_default_config() {
     local nginx_config_path="$BUILD_DIR/feeds/packages/net/nginx-util/files/nginx.config"
@@ -1005,6 +1050,7 @@ main() {
     add_timecontrol
     add_gecoosac
     add_quickfile
+    add_bandix
     update_lucky
     fix_rust_compile_error
     update_smartdns
