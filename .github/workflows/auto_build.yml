@@ -1,19 +1,17 @@
-name: Auto Build and Release WRT
-run-name: Auto Build - ${{ matrix.model }}
+name: Auto Build WRT
 
 on:
   schedule:
-    # 每天北京时间 0 点 (即 UTC 16:00) 触发
-    - cron: "0 2 * * *"
-
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - cron: "0 16 * * *"
 
 jobs:
   auto-build:
     strategy:
       matrix:
         model: [jdcloud_ipq60xx_immwrt, jdcloud_ipq60xx_libwrt]
-    uses: ./.github/workflows/build_wrt.yml
-    with:
-      model: ${{ matrix.model }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Build Workflow
+        uses: ./.github/workflows/build_wrt.yml
+        with:
+          model: ${{ matrix.model }}
