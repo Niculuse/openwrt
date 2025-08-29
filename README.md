@@ -36,5 +36,5 @@
   - 完成配置后，点击**启动**按钮激活服务  
 
 - 固件说明：
-  - factory为uboot直刷固件，sysupgrad为网页升级固件，任选其一即可 
+  - factory为uboot直刷固件，sysupgrade为网页升级固件，任选其一即可 
   - 本项目fork于ZqinKingd的仓库(https://github.com/ZqinKing/wrt_release)，进行了进一步精简，默认移除了smartdns、easytier、quickfile、mosdns、lucky等插件
