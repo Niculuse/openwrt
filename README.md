@@ -18,8 +18,7 @@
   ./build.sh jdcloud_ipq60xx_immwrt  
   ./build.sh jdcloud_ipq60xx_libwrt  
   ```
-  注：默认只编译**京东云雅典娜(02)**， 亚瑟(01)、太乙(07)、AX5(JDC版)默认不编译。如需编译，自行修改defconfig中的配置文件。
-
+  
 # GitHub Action在线编译
 - fork本仓库
 - 进入自己的项目主页，
