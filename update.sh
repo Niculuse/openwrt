@@ -463,6 +463,7 @@ apply_passwall_tweaks() {
         sed -i 's/maxRTT = "1s"/maxRTT = "2s"/g' "$xray_util_path"
         sed -i 's/sampling = 3/sampling = 5/g' "$xray_util_path"
     fi
+    sed -i '/^define Package\/$(PKG_NAME)\/config$/i LUCI_DEPENDS+=+haproxy +v2ray-plugin +shadowsocks-rust-sslocal +shadowsocks-rust-ssserver' $BUILD_DIR/feeds/small8/luci-app-passwall/Makefile
 }
 
 install_opkg_distfeeds() {
