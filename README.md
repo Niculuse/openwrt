@@ -14,10 +14,14 @@
     cd openwrt  
   ```
 - 固件编译
-  ```bash 
-  ./build.sh jdcloud_ipq60xx_immwrt  
-  ./build.sh jdcloud_ipq60xx_libwrt  
-  ```
+  - ImmortalWRT
+    ```bash 
+    ./build.sh jdcloud_ipq60xx_immwrt  
+    ```
+  - LibWRT
+    ```bash 
+    ./build.sh jdcloud_ipq60xx_libwrt  
+    ```
   
 # 在线编译
 - fork本仓库
