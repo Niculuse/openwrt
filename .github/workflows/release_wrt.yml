@@ -8,10 +8,10 @@ on:
         required: true
         description: Device Model
         type: choice
-        default: jdcloud_ipq60xx_immwrt
+        default: jdcloud_ipq60xx_libwrt
         options:
-          - jdcloud_ipq60xx_immwrt
           - jdcloud_ipq60xx_libwrt
+          - jdcloud_ipq60xx_immwrt
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

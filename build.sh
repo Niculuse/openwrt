@@ -39,6 +39,13 @@ remove_uhttpd_dependency() {
     fi
 }
 
+update_passwall(){
+    rm -rf $BASE_PATH/$BUILD_DIR/feeds/small8/luci-app-passwall
+    git clone https://github.com/xiaorouji/openwrt-passwall openwrt-passwall
+    mv openwrt-passwall/luci-app-passwall $BASE_PATH/$BUILD_DIR/feeds/luci/
+    make defconfig
+}
+
 # 应用配置文件
 apply_config() {
     # 复制基础配置文件
@@ -91,7 +98,9 @@ if [[ -d $TARGET_DIR ]]; then
     find "$TARGET_DIR" -type f \( -name "*.bin" -o -name "*.manifest" -o -name "*efi.img.gz" -o -name "*.itb" -o -name "*.fip" -o -name "*.ubi" -o -name "*rootfs.tar.gz" \) -exec rm -f {} +
 fi
 
-make download -j$(($(nproc) * 2))
+make download -j$(($(nproc) * 4))
+[ "$EUID" -eq 0 ] && export FORCE_UNSAFE_CONFIGURE=1
+update_passwall
 make -j$(($(nproc) + 1)) || make -j1 V=s
 
 FIRMWARE_DIR="$BASE_PATH/firmware"
