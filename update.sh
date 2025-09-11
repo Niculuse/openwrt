@@ -166,12 +166,10 @@ install_small8() {
     ./scripts/feeds install -p small8 -f xray-core xray-plugin dns2tcp dns2socks haproxy hysteria \
         naiveproxy shadowsocks-rust sing-box v2ray-core v2ray-geodata v2ray-geoview v2ray-plugin \
         tuic-client chinadns-ng ipt2socks tcping trojan-plus simple-obfs shadowsocksr-libev \
-        luci-app-passwall v2dat mosdns luci-app-mosdns adguardhome luci-app-adguardhome ddns-go \
-        luci-app-ddns-go taskd luci-lib-xterm luci-lib-taskd luci-app-store quickstart \
+        v2dat adguardhome luci-app-adguardhome taskd luci-lib-xterm luci-lib-taskd luci-app-store quickstart \
         luci-app-quickstart luci-app-istorex luci-app-cloudflarespeedtest netdata luci-app-netdata \
-        lucky luci-app-lucky luci-app-openclash luci-app-homeproxy luci-app-amlogic nikki luci-app-nikki \
-        tailscale luci-app-tailscale oaf open-app-filter luci-app-oaf easytier luci-app-easytier \
-        msd_lite luci-app-msd_lite cups luci-app-cupsd
+        luci-app-openclash luci-app-homeproxy luci-app-amlogic oaf open-app-filter luci-app-oaf msd_lite \
+        luci-app-msd_lite cups luci-app-cupsd
 }
 
 install_fullconenat() {
@@ -449,14 +447,23 @@ EOF
     chmod +x "$sh_dir/custom_task"
 }
 
-# 应用 Passwall 相关调整
-apply_passwall_tweaks() {
+add_passwall() {
+    local repo_url_core="https://github.com/xiaorouji/openwrt-passwall.git"
+    local target_dir_core="$BUILD_DIR/feeds/small8/luci-app-passwall"
+    if [ -d "$target_dir_core" ]; then
+        rm -rf "$target_dir_core"
+    fi
+    echo "正在添加 luci-app-passwall..."
+    if ! git clone --depth 1 "$repo_url_core" $BUILD_DIR/openwrt-passwall; then
+        echo "错误：从 $repo_url_core 克隆 luci-app-passwall 仓库失败" >&2
+        exit 1
+    fi
+    mv $BUILD_DIR/openwrt-passwall/luci-app-passwall $target_dir_core
     # 清理 Passwall 的 chnlist 规则文件
     local chnlist_path="$BUILD_DIR/feeds/small8/luci-app-passwall/root/usr/share/passwall/rules/chnlist"
     if [ -f "$chnlist_path" ]; then
         > "$chnlist_path"
     fi
-
     # 调整 Xray 最大 RTT 和 保留记录数量
     local xray_util_path="$BUILD_DIR/feeds/small8/luci-app-passwall/luasrc/passwall/util_xray.lua"
     if [ -f "$xray_util_path" ]; then
@@ -908,6 +915,10 @@ add_bandix() {
     fi
 }
 
+fix_simple_obs() {
+    sed -i '/^PKG_MIRROR_HASH:=/d' $BUILD_DIR/feeds/small8/simple-obfs/Makefile
+}
+
 # 设置 Nginx 默认配置
 set_nginx_default_config() {
     local nginx_config_path="$BUILD_DIR/feeds/packages/net/nginx-util/files/nginx.config"
@@ -1021,7 +1032,7 @@ main() {
     update_tcping
     add_ax6600_led
     set_custom_task
-    apply_passwall_tweaks
+    add_passwall
     install_opkg_distfeeds
     update_nss_pbuf_performance
     set_build_signature
@@ -1054,6 +1065,7 @@ main() {
     update_package "docker" "tags" "v28.2.2"
     update_package "dockerd" "releases" "v28.2.2"
     apply_hash_fixes # 调用哈希修正函数
+    fix_simple_obs
 }
 
 main "$@"
