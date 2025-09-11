@@ -166,11 +166,11 @@ install_small8() {
     ./scripts/feeds install -p small8 -f xray-core xray-plugin dns2tcp dns2socks haproxy hysteria \
         naiveproxy shadowsocks-rust sing-box v2ray-core v2ray-geodata v2ray-geoview v2ray-plugin \
         tuic-client chinadns-ng ipt2socks tcping trojan-plus simple-obfs shadowsocksr-libev \
-        luci-app-passwall v2dat mosdns luci-app-mosdns adguardhome luci-app-adguardhome ddns-go \
-        luci-app-ddns-go taskd luci-lib-xterm luci-lib-taskd luci-app-store quickstart \
+        v2dat adguardhome luci-app-adguardhome \
+        taskd luci-lib-xterm luci-lib-taskd luci-app-store quickstart \
         luci-app-quickstart luci-app-istorex luci-app-cloudflarespeedtest netdata luci-app-netdata \
-        lucky luci-app-lucky luci-app-openclash luci-app-homeproxy luci-app-amlogic nikki luci-app-nikki \
-        tailscale luci-app-tailscale oaf open-app-filter luci-app-oaf easytier luci-app-easytier \
+        luci-app-openclash luci-app-homeproxy luci-app-amlogic \
+        oaf open-app-filter luci-app-oaf \
         msd_lite luci-app-msd_lite cups luci-app-cupsd
 }
 
@@ -449,20 +449,11 @@ EOF
     chmod +x "$sh_dir/custom_task"
 }
 
-# 应用 Passwall 相关调整
-apply_passwall_tweaks() {
-    # 清理 Passwall 的 chnlist 规则文件
-    local chnlist_path="$BUILD_DIR/feeds/small8/luci-app-passwall/root/usr/share/passwall/rules/chnlist"
-    if [ -f "$chnlist_path" ]; then
-        > "$chnlist_path"
-    fi
-
-    # 调整 Xray 最大 RTT 和 保留记录数量
-    local xray_util_path="$BUILD_DIR/feeds/small8/luci-app-passwall/luasrc/passwall/util_xray.lua"
-    if [ -f "$xray_util_path" ]; then
-        sed -i 's/maxRTT = "1s"/maxRTT = "2s"/g' "$xray_util_path"
-        sed -i 's/sampling = 3/sampling = 5/g' "$xray_util_path"
-    fi
+add_passwall() {
+    rm -rf $BUILD_DIR/feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+    git clone https://github.com/xiaorouji/openwrt-passwall-packages $BUILD_DIR/package/passwall-packages
+    rm -rf $BUILD_DIR/feeds/luci/applications/luci-app-passwall
+    git clone https://github.com/xiaorouji/openwrt-passwall $BUILD_DIR/package/passwall-luci
 }
 
 install_opkg_distfeeds() {
@@ -1021,7 +1012,7 @@ main() {
     update_tcping
     add_ax6600_led
     set_custom_task
-    apply_passwall_tweaks
+    add_passwall
     install_opkg_distfeeds
     update_nss_pbuf_performance
     set_build_signature
