@@ -463,6 +463,7 @@ apply_passwall_tweaks() {
         sed -i 's/maxRTT = "1s"/maxRTT = "2s"/g' "$xray_util_path"
         sed -i 's/sampling = 3/sampling = 5/g' "$xray_util_path"
     fi
+    sed -i '/^define Package\/$(PKG_NAME)\/config$/i LUCI_DEPENDS+=+haproxy +v2ray-plugin +shadowsocks-rust-sslocal +shadowsocks-rust-ssserver +simple-obfs-client' $BUILD_DIR/feeds/small8/luci-app-passwall/Makefile
 }
 
 install_opkg_distfeeds() {
@@ -908,6 +909,10 @@ add_bandix() {
     fi
 }
 
+fix_simple_obs() {
+    sed -i '/^PKG_HASH:=/d' $BUILD_DIR/feeds/small8/simple-obfs/Makefile
+}
+
 # 设置 Nginx 默认配置
 set_nginx_default_config() {
     local nginx_config_path="$BUILD_DIR/feeds/packages/net/nginx-util/files/nginx.config"
@@ -1054,6 +1059,7 @@ main() {
     update_package "docker" "tags" "v28.2.2"
     update_package "dockerd" "releases" "v28.2.2"
     apply_hash_fixes # 调用哈希修正函数
+    fix_simple_obs
 }
 
 main "$@"
