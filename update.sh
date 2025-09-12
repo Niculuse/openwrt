@@ -910,7 +910,7 @@ add_bandix() {
 }
 
 fix_simple_obs() {
-    sed -i '/^PKG_HASH:=/d' $BUILD_DIR/feeds/small8/simple-obfs/Makefile
+    sed -i '/^PKG_MIRROR_HASH:=/d' $BUILD_DIR/feeds/small8/simple-obfs/Makefile
 }
 
 # 设置 Nginx 默认配置
