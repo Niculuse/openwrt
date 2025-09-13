@@ -468,7 +468,7 @@ modify_passwall() {
         sed -i 's/maxRTT = "1s"/maxRTT = "2s"/g' "$xray_util_path"
         sed -i 's/sampling = 3/sampling = 5/g' "$xray_util_path"
     fi
-    sed -i '/^config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox/,/^config / { s/^default y if aarch64||arm||i386||x86_64$/default n/ }' $target_dir_core/Makefile
+    # sed -i '/^config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox/,/^config / { s/^default y if aarch64||arm||i386||x86_64$/default n/ }' $target_dir_core/Makefile
     sed -i '/^define Package\/$(PKG_NAME)\/config/i LUCI_DEPENDS+=+haproxy +simple-obfs-client' $target_dir_core/Makefile
 
 }
