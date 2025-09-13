@@ -448,15 +448,7 @@ EOF
 }
 
 modify_passwall() {
-    local repo_url_core="https://github.com/xiaorouji/openwrt-passwall.git"
-    local target_dir_core="$BUILD_DIR/feeds/small8/luci-app-passwall"
-    [ -d "$target_dir_core" ] && rm -rf "$target_dir_core"
-    echo "正在添加 luci-app-passwall..."
-    if ! git clone --depth 1 "$repo_url_core" $target_dir_core; then
-        echo "错误：从 $repo_url_core 克隆 luci-app-passwall 仓库失败" >&2
-        exit 1
-    fi
-    mv $target_dir_core/luci-app-passwall/* $target_dir_core/
+    
     # 清理 Passwall 的 chnlist 规则文件
     local chnlist_path="$target_dir_core/root/usr/share/passwall/rules/chnlist"
     if [ -f "$chnlist_path" ]; then
@@ -469,7 +461,7 @@ modify_passwall() {
         sed -i 's/sampling = 3/sampling = 5/g' "$xray_util_path"
     fi
     # sed -i '/^config PACKAGE_$(PKG_NAME)_INCLUDE_SingBox/,/^config / { s/^default y if aarch64||arm||i386||x86_64$/default n/ }' $target_dir_core/Makefile
-    sed -i '/^define Package\/$(PKG_NAME)\/config/i LUCI_DEPENDS+=+haproxy +simple-obfs-client' $target_dir_core/Makefile
+    sed -i '/^define Package\/$(PKG_NAME)\/config/i LUCI_DEPENDS+=+haproxy +sing-box +shadowsocks-rust-sslocal +shadowsocks-rust-ssserver +simple-obfs-client' $target_dir_core/Makefile
 
 }
 
