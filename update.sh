@@ -448,7 +448,7 @@ EOF
 }
 
 modify_passwall() {
-    
+    local target_dir_core=$BUILD_DIR/feeds/small8/luci-app-passwall
     # 清理 Passwall 的 chnlist 规则文件
     local chnlist_path="$target_dir_core/root/usr/share/passwall/rules/chnlist"
     if [ -f "$chnlist_path" ]; then
