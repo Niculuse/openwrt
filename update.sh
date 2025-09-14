@@ -1049,7 +1049,6 @@ main() {
     update_package "docker" "tags" "v28.2.2"
     update_package "dockerd" "releases" "v28.2.2"
     apply_hash_fixes # 调用哈希修正函数
-    add_passwall
 }
 
 main "$@"
