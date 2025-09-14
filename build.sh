@@ -39,6 +39,24 @@ remove_uhttpd_dependency() {
     fi
 }
 
+fix_luci-app-passwall(){
+    rm -rf $BASE_PATH/$BUILD_DIR/feeds/small8/luci-app-passwall
+    git clone https://github.com/xiaorouji/openwrt-passwall openwrt-passwall
+    mv openwrt-passwall/luci-app-passwall $BASE_PATH/$BUILD_DIR/package/feeds/luci/
+    # 清理 Passwall 的 chnlist 规则文件
+    local chnlist_path="$BASE_PATH/$BUILD_DIR/package/feeds/luci/luci-app-passwall/root/usr/share/passwall/rules/chnlist"
+    if [ -f "$chnlist_path" ]; then
+        > "$chnlist_path"
+    fi
+    # 调整 Xray 最大 RTT 和 保留记录数量
+    local xray_util_path="$$BASE_PATH/$BUILD_DIR/package/feeds/luci/luci-app-passwall/luasrc/passwall/util_xray.lua"
+    if [ -f "$xray_util_path" ]; then
+        sed -i 's/maxRTT = "1s"/maxRTT = "2s"/g' "$xray_util_path"
+        sed -i 's/sampling = 3/sampling = 5/g' "$xray_util_path"
+    fi
+    make defconfig
+}
+
 # 应用配置文件
 apply_config() {
     # 复制基础配置文件
@@ -93,6 +111,7 @@ fi
 
 make download -j$(($(nproc) * 4))
 [ "$EUID" -eq 0 ] && export FORCE_UNSAFE_CONFIGURE=1
+fix_luci-app-passwall
 make -j$(($(nproc) + 1)) || make -j1 V=s
 
 FIRMWARE_DIR="$BASE_PATH/firmware"
