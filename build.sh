@@ -43,15 +43,14 @@ remove_uhttpd_dependency() {
 apply_config() {
     # 复制基础配置文件
     \cp -f "$CONFIG_FILE" "$BASE_PATH/$BUILD_DIR/.config"
-    
     # 如果是 ipq60xx 或 ipq807x 平台，则追加 NSS 配置
     if grep -qE "(ipq60xx|ipq807x)" "$BASE_PATH/$BUILD_DIR/.config"; then
         cat "$BASE_PATH/deconfig/nss.config" >> "$BASE_PATH/$BUILD_DIR/.config"
     fi
-
+    # 追加通用配置
+    cat "$BASE_PATH/deconfig/common.config" >> "$BASE_PATH/$BUILD_DIR/.config"
     # 追加代理配置
     cat "$BASE_PATH/deconfig/proxy.config" >> "$BASE_PATH/$BUILD_DIR/.config"
-
     # 追加busybox自定义配置
     cat "$BASE_PATH/deconfig/busybox.config" >> "$BASE_PATH/$BUILD_DIR/.config"
 }
