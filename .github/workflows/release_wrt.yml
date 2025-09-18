@@ -106,10 +106,8 @@ jobs:
 
       - name: Prepare Release Body
         run: |
-          echo "更新说明" > release_body.txt
+          echo "**更新说明**"： > release_body.txt
           git log -1 --pretty=%s >> release_body.txt
-          printf '=%.0s' {1..50} >> release_body.txt
-          echo -e "\n" >> release_body.txt
           echo "**固件说明**：" >> release_body.txt
           echo "源码：${{ env.BUILD_SRC }}" >> release_body.txt
           echo "Kernel: ${{ env.KVER }}" >> release_body.txt
