@@ -1,4 +1,4 @@
-name: OpenWRT Release All
+name: Release All
 
 on:
   workflow_dispatch:
