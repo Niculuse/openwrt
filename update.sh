@@ -987,14 +987,6 @@ update_argon() {
     echo "luci-theme-argon 更新完成"
 }
 
-add_passwall(){
-    rm -rf $BUILD_DIR/feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-    rm -rf $BUILD_DIR/feeds/small8/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-    rm -rf $BUILD_DIR/feeds/luci/applications/luci-app-passwall
-    git clone https://github.com/xiaorouji/openwrt-passwall-packages $BUILD_DIR/package/passwall-packages
-    git clone https://github.com/xiaorouji/openwrt-passwall $BUILD_DIR/package/passwall-luci
-}
-
 main() {
     clone_repo
     clean_up
