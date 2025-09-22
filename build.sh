@@ -92,8 +92,6 @@ fi
 
 make download -j$(($(nproc) * 4))
 [ "$EUID" -eq 0 ] && export FORCE_UNSAFE_CONFIGURE=1
-echo "CONFIG_PACKAGE_luci-app-passwall2=y" >> $BASE_PATH/$BUILD_DIR/.config
-make defconfig
 make -j$(($(nproc) + 1)) || make -j1 V=s
 
 FIRMWARE_DIR="$BASE_PATH/firmware"
