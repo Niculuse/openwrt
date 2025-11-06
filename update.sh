@@ -76,13 +76,18 @@ reset_feeds_conf() {
 
 update_feeds() {
     # 删除注释行
-    sed -i '/^#/d' "$BUILD_DIR/$FEEDS_CONF"
+    local FEEDS_PATH="$BUILD_DIR/$FEEDS_CONF"
+    if [[ -f "$BUILD_DIR/feeds.conf" ]]; then
+        FEEDS_PATH="$BUILD_DIR/feeds.conf"
+    fi
+    sed -i '/^#/d' "$FEEDS_PATH"
+    sed -i '/packages_ext/d' "$FEEDS_PATH"
 
     # 检查并添加 small-package 源
-    if ! grep -q "small-package" "$BUILD_DIR/$FEEDS_CONF"; then
+    if ! grep -q "small-package" "$FEEDS_PATH"; then
         # 确保文件以换行符结尾
-        [ -z "$(tail -c 1 "$BUILD_DIR/$FEEDS_CONF")" ] || echo "" >>"$BUILD_DIR/$FEEDS_CONF"
-        echo "src-git small8 https://github.com/kenzok8/small-package" >>"$BUILD_DIR/$FEEDS_CONF"
+        [ -z "$(tail -c 1 "$FEEDS_PATH")" ] || echo "" >>"$FEEDS_PATH"
+        echo "src-git small8 https://github.com/kenzok8/small-package" >>"$FEEDS_PATH"
     fi
 
     # 添加bpf.mk解决更新报错
@@ -121,7 +126,7 @@ remove_unwanted_packages() {
     )
     local small8_packages=(
         "ppp" "firewall" "dae" "daed" "daed-next" "libnftnl" "nftables" "dnsmasq" "luci-app-alist"
-        "alist" "opkg" "smartdns" "luci-app-smartdns"
+        "alist" "opkg"
     )
 
     for pkg in "${luci_packages[@]}"; do
@@ -196,6 +201,30 @@ install_fullconenat() {
     fi
 }
 
+check_default_settings() {
+    local settings_dir="$BUILD_DIR/package/emortal/default-settings"
+    if [ ! -d "$settings_dir" ]; then
+        echo "目录 $settings_dir 不存在，正在从 immortalwrt 仓库克隆..."
+        local tmp_dir
+        tmp_dir=$(mktemp -d)
+        if git clone --depth 1 --filter=blob:none --sparse https://github.com/immortalwrt/immortalwrt.git "$tmp_dir"; then
+            pushd "$tmp_dir" > /dev/null
+            git sparse-checkout set package/emortal/default-settings
+            # 确保目标父目录存在
+            mkdir -p "$(dirname "$settings_dir")"
+            # 移动 default-settings 目录
+            mv package/emortal/default-settings "$settings_dir"
+            popd > /dev/null
+            rm -rf "$tmp_dir"
+            echo "default-settings 克隆并移动成功。"
+        else
+            echo "错误：克隆 immortalwrt 仓库失败" >&2
+            rm -rf "$tmp_dir"
+            exit 1
+        fi
+    fi
+}
+
 install_feeds() {
     ./scripts/feeds update -i
     for dir in $BUILD_DIR/feeds/*; do
@@ -217,8 +246,9 @@ fix_default_set() {
         find "$BUILD_DIR/feeds/luci/collections/" -type f -name "Makefile" -exec sed -i "s/luci-theme-bootstrap/luci-theme-$THEME_SET/g" {} \;
     fi
 
-    install -Dm755 "$BASE_PATH/patches/990_set_argon_primary" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/990_set_argon_primary"
-    install -Dm755 "$BASE_PATH/patches/991_custom_settings" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/991_custom_settings"
+    install -Dm544 "$BASE_PATH/patches/990_set_argon_primary" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/990_set_argon_primary"
+    install -Dm544 "$BASE_PATH/patches/991_custom_settings" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/991_custom_settings"
+    install -Dm544 "$BASE_PATH/patches/992_set-wifi-uci.sh" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/992_set-wifi-uci.sh"
 
     if [ -f "$BUILD_DIR/package/emortal/autocore/files/tempinfo" ]; then
         if [ -f "$BASE_PATH/patches/tempinfo" ]; then
@@ -246,17 +276,6 @@ fix_mk_def_depends() {
     sed -i 's/libustream-mbedtls/libustream-openssl/g' $BUILD_DIR/include/target.mk 2>/dev/null
     if [ -f $BUILD_DIR/target/linux/qualcommax/Makefile ]; then
         sed -i 's/wpad-openssl/wpad-mesh-openssl/g' $BUILD_DIR/target/linux/qualcommax/Makefile
-    fi
-}
-
-add_wifi_default_set() {
-    local qualcommax_uci_dir="$BUILD_DIR/target/linux/qualcommax/base-files/etc/uci-defaults"
-    local filogic_uci_dir="$BUILD_DIR/target/linux/mediatek/filogic/base-files/etc/uci-defaults"
-    if [ -d "$qualcommax_uci_dir" ]; then
-        install -Dm755 "$BASE_PATH/patches/992_set-wifi-uci.sh" "$qualcommax_uci_dir/992_set-wifi-uci.sh"
-    fi
-    if [ -d "$filogic_uci_dir" ]; then
-        install -Dm755 "$BASE_PATH/patches/992_set-wifi-uci.sh" "$filogic_uci_dir/992_set-wifi-uci.sh"
     fi
 }
 
@@ -358,6 +377,9 @@ fix_mkpkg_format_invalid() {
         fi
         if [ -f $BUILD_DIR/feeds/small8/luci-lib-taskd/Makefile ]; then
             sed -i 's/>=1\.0\.3-1/>=1\.0\.3-r1/g' $BUILD_DIR/feeds/small8/luci-lib-taskd/Makefile
+        fi
+        if [ -f $BUILD_DIR/feeds/small8/luci-app-openclash/Makefile ]; then
+            sed -i 's/PKG_RELEASE:=beta/PKG_RELEASE:=1/g' $BUILD_DIR/feeds/small8/luci-app-openclash/Makefile
         fi
         if [ -f $BUILD_DIR/feeds/small8/luci-app-quickstart/Makefile ]; then
             sed -i 's/PKG_VERSION:=0\.8\.16-1/PKG_VERSION:=0\.8\.16/g' $BUILD_DIR/feeds/small8/luci-app-quickstart/Makefile
@@ -650,6 +672,20 @@ function update_script_priority() {
     if [ -d "${pbuf_path%/*}" ] && [ -f "$pbuf_path" ]; then
         sed -i 's/START=.*/START=89/g' "$pbuf_path"
     fi
+
+    # 更新mosdns服务的启动顺序
+    local mosdns_path="$BUILD_DIR/package/feeds/small8/luci-app-mosdns/root/etc/init.d/mosdns"
+    if [ -d "${mosdns_path%/*}" ] && [ -f "$mosdns_path" ]; then
+        sed -i 's/START=.*/START=94/g' "$mosdns_path"
+    fi
+}
+
+update_mosdns_deconfig() {
+    local mosdns_conf="$BUILD_DIR/feeds/small8/luci-app-mosdns/root/etc/config/mosdns"
+    if [ -d "${mosdns_conf%/*}" ] && [ -f "$mosdns_conf" ]; then
+        sed -i 's/8000/300/g' "$mosdns_conf"
+        sed -i 's/5335/5336/g' "$mosdns_conf"
+    fi
 }
 
 fix_quickstart() {
@@ -757,6 +793,36 @@ update_geoip() {
                 fi
             fi
         fi
+    fi
+}
+
+update_lucky() {
+    # 从补丁文件名中提取版本号
+    local version
+    version=$(find "$BASE_PATH/patches" -name "lucky_*.tar.gz" -printf "%f\n" | head -n 1 | sed -n 's/^lucky_\(.*\)_Linux.*$/\1/p')
+    if [ -z "$version" ]; then
+        echo "Warning: 未找到 lucky 补丁文件，跳过更新。" >&2
+        return 0
+    fi
+
+    local makefile_path="$BUILD_DIR/feeds/small8/lucky/Makefile"
+    if [ ! -f "$makefile_path" ]; then
+        echo "Warning: lucky Makefile not found. Skipping." >&2
+        return 0
+    fi
+
+    echo "正在更新 lucky Makefile..."
+    # 使用本地补丁文件，而不是下载
+    local patch_line="\\t[ -f \$(TOPDIR)/../patches/lucky_${version}_Linux_\$(LUCKY_ARCH)_wanji.tar.gz ] && install -Dm644 \$(TOPDIR)/../patches/lucky_${version}_Linux_\$(LUCKY_ARCH)_wanji.tar.gz \$(PKG_BUILD_DIR)/\$(PKG_NAME)_\$(PKG_VERSION)_Linux_\$(LUCKY_ARCH).tar.gz"
+
+    # 确保 Build/Prepare 部分存在，然后在其后添加我们的行
+    if grep -q "Build/Prepare" "$makefile_path"; then
+        sed -i "/Build\\/Prepare/a\\$patch_line" "$makefile_path"
+        # 删除任何现有的 wget 命令
+        sed -i '/wget/d' "$makefile_path"
+        echo "lucky Makefile 更新完成。"
+    else
+        echo "Warning: lucky Makefile 中未找到 'Build/Prepare'。跳过。" >&2
     fi
 }
 
@@ -953,6 +1019,13 @@ fix_easytier_lua() {
     fi
 }
 
+fix_easytier_mk() {
+	local mk_path="$BUILD_DIR/feeds/small8/luci-app-easytier/easytier/Makefile"
+    if [ -f "$mk_path" ]; then
+        sed -i 's/!@(mips||mipsel)/!TARGET_mips \&\& !TARGET_mipsel/g' "$mk_path"
+    fi
+}
+
 # 更新 nginx-mod-ubus 模块
 update_nginx_ubus_module() {
     local makefile_path="$BUILD_DIR/feeds/packages/net/nginx/Makefile"
@@ -983,7 +1056,6 @@ main() {
     update_golang
     change_dnsmasq2full
     fix_mk_def_depends
-    add_wifi_default_set
     update_default_lan_addr
     remove_something_nss_kmod
     update_affinity_script
@@ -994,7 +1066,6 @@ main() {
     add_ax6600_led
     set_custom_task
     apply_passwall_tweaks
-    install_opkg_distfeeds
     update_nss_pbuf_performance
     set_build_signature
     update_nss_diag
@@ -1002,6 +1073,7 @@ main() {
     fix_compile_coremark
     update_dnsmasq_conf
     add_backup_info_to_sysupgrade
+    update_mosdns_deconfig
     fix_quickstart
     update_oaf_deconfig
     add_timecontrol
@@ -1014,6 +1086,9 @@ main() {
     update_uwsgi_limit_as
     update_argon
     update_nginx_ubus_module # 更新 nginx-mod-ubus 模块
+    check_default_settings
+    install_opkg_distfeeds
+    fix_easytier_mk
     install_feeds
     fix_easytier_lua
     update_adguardhome
