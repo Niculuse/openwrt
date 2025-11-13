@@ -7,4 +7,5 @@ fi
 
 uci set argon.@global[0].primary='#6A89CC'
 uci set argon.@global[0].transparency='0.3'
+uci set argon.@global[0].mode='normal'
 uci commit argon
