@@ -188,8 +188,8 @@ install_small8() {
         tuic-client chinadns-ng ipt2socks tcping trojan-plus simple-obfs shadowsocksr-libev \
         v2dat adguardhome luci-app-adguardhome taskd luci-lib-xterm luci-lib-taskd luci-app-store quickstart \
         luci-app-quickstart luci-app-istorex luci-app-cloudflarespeedtest netdata luci-app-netdata \
-        luci-app-homeproxy luci-app-amlogic oaf open-app-filter luci-app-oaf \
-        msd_lite luci-app-msd_lite cups luci-app-cupsd
+        luci-app-homeproxy luci-app-amlogic oaf open-app-filter luci-app-oaf msd_lite luci-app-msd_lite \
+        cups luci-app-cupsd
 }
 
 install_fullconenat() {
