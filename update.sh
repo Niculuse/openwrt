@@ -186,10 +186,10 @@ install_small8() {
     ./scripts/feeds install -p small8 -f xray-core xray-plugin dns2tcp dns2socks haproxy hysteria \
         naiveproxy shadowsocks-rust sing-box v2ray-core v2ray-geodata v2ray-geoview v2ray-plugin \
         tuic-client chinadns-ng ipt2socks tcping trojan-plus simple-obfs shadowsocksr-libev \
-        v2dat adguardhome luci-app-adguardhome taskd luci-lib-xterm luci-lib-taskd luci-app-store quickstart \
-        luci-app-quickstart luci-app-istorex luci-app-cloudflarespeedtest netdata luci-app-netdata \
-        luci-app-homeproxy luci-app-amlogic oaf open-app-filter luci-app-oaf \
-        msd_lite luci-app-msd_lite cups luci-app-cupsd
+        v2dat adguardhome luci-app-adguardhome taskd luci-lib-xterm luci-lib-taskd luci-app-store \
+        luci-app-istorex luci-app-cloudflarespeedtest netdata luci-app-netdata \
+        luci-app-homeproxy luci-app-amlogic oaf open-app-filter luci-app-oaf msd_lite luci-app-msd_lite \
+        cups luci-app-cupsd luci-app-passwall luci-app-openclash
 }
 
 install_fullconenat() {
@@ -257,6 +257,13 @@ fix_default_set() {
     fi
 }
 
+allow_wan_80_port(){
+    local patch_file="989_allow_wan_80_port.sh"
+    if [ -f "$BASE_PATH/patches/$patch_file" ]; then
+        install -Dm544 "$BASE_PATH/patches/$patch_file" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/$patch_file"
+    fi
+}
+
 fix_miniupnpd() {
     local miniupnpd_dir="$BUILD_DIR/feeds/packages/net/miniupnpd"
     local patch_file="999-chanage-default-leaseduration.patch"
@@ -277,6 +284,10 @@ fix_mk_def_depends() {
     if [ -f $BUILD_DIR/target/linux/qualcommax/Makefile ]; then
         sed -i 's/wpad-openssl/wpad-mesh-openssl/g' $BUILD_DIR/target/linux/qualcommax/Makefile
     fi
+}
+
+remove_luci_app_attendedsysupgrade(){
+    sed -i 's/\+luci-app-attendedsysupgrade//g' $BUILD_DIR/package/feeds/luci/luci/Makefile
 }
 
 update_default_lan_addr() {
@@ -1052,6 +1063,7 @@ main() {
     remove_tweaked_packages
     update_homeproxy
     fix_default_set
+    allow_wan_80_port
     fix_miniupnpd
     update_golang
     change_dnsmasq2full
@@ -1074,7 +1086,6 @@ main() {
     update_dnsmasq_conf
     add_backup_info_to_sysupgrade
     update_mosdns_deconfig
-    fix_quickstart
     update_oaf_deconfig
     add_timecontrol
     add_gecoosac
@@ -1093,6 +1104,7 @@ main() {
     fix_easytier_lua
     update_adguardhome
     update_script_priority
+    remove_luci_app_attendedsysupgrade
     update_geoip
     update_package "runc" "releases" "v1.2.6"
     update_package "containerd" "releases" "v1.7.27"
