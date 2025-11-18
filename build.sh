@@ -44,7 +44,8 @@ apply_config() {
     # 复制基础配置文件
     \cp -f "$CONFIG_FILE" "$BASE_PATH/$BUILD_DIR/.config"
     # 如果是 ipq60xx 或 ipq807x 平台，则追加 NSS 配置
-    if grep -qE "(ipq60xx|ipq807x)" "$BASE_PATH/$BUILD_DIR/.config"; then
+    if grep -qE "(ipq60xx|ipq807x)" "$BASE_PATH/$BUILD_DIR/.config" &&
+        ! grep -q "CONFIG_GIT_MIRROR" "$BASE_PATH/$BUILD_DIR/.config"; then
         cat "$BASE_PATH/deconfig/nss.config" >> "$BASE_PATH/$BUILD_DIR/.config"
     fi
     # 追加通用配置
