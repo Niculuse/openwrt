@@ -264,6 +264,13 @@ allow_wan_80_port(){
     fi
 }
 
+install_speedtest_cli(){
+    local patch_file="speedtest"
+    if [ -f "$BASE_PATH/patches/$patch_file" ]; then
+        install -Dm544 "$BASE_PATH/patches/$patch_file" "$BUILD_DIR/package/base-files/files/usr/bin/$patch_file"
+    fi
+}
+
 fix_miniupnpd() {
     local miniupnpd_dir="$BUILD_DIR/feeds/packages/net/miniupnpd"
     local patch_file="999-chanage-default-leaseduration.patch"
@@ -1106,6 +1113,7 @@ main() {
     update_script_priority
     remove_luci_app_attendedsysupgrade
     update_geoip
+    install_speedtest_cli
     update_package "runc" "releases" "v1.2.6"
     update_package "containerd" "releases" "v1.7.27"
     update_package "docker" "tags" "v28.2.2"
