@@ -186,7 +186,7 @@ update_golang() {
 
 install_small8() {
     ./scripts/feeds install -p small8 -f xray-core xray-plugin dns2tcp dns2socks haproxy hysteria \
-        naiveproxy shadowsocks-rust sing-box v2ray-core v2ray-geodata v2ray-geoview v2ray-plugin \
+        naiveproxy shadowsocks-rust sing-box v2ray-core v2ray-geodata geoview v2ray-plugin \
         tuic-client chinadns-ng ipt2socks tcping trojan-plus simple-obfs shadowsocksr-libev \
         v2dat adguardhome luci-app-adguardhome taskd luci-lib-xterm luci-lib-taskd luci-app-store \
         luci-app-istorex luci-app-cloudflarespeedtest netdata luci-app-netdata \
