@@ -189,7 +189,7 @@ install_small8() {
         naiveproxy shadowsocks-rust sing-box v2ray-core v2ray-geodata geoview v2ray-plugin \
         tuic-client chinadns-ng ipt2socks tcping trojan-plus simple-obfs shadowsocksr-libev \
         v2dat adguardhome luci-app-adguardhome taskd luci-lib-xterm luci-lib-taskd luci-app-store \
-        luci-app-istorex luci-app-cloudflarespeedtest netdata luci-app-netdata \
+        luci-app-istorex luci-app-cloudflarespeedtest netdata luci-app-netdata quickstart luci-app-quickstart \
         luci-app-homeproxy luci-app-amlogic oaf open-app-filter luci-app-oaf msd_lite luci-app-msd_lite \
         cups luci-app-cupsd luci-app-openclash luci-app-passwall
 }
@@ -1181,6 +1181,7 @@ main() {
     set_nginx_default_config
     update_uwsgi_limit_as
     update_argon
+    fix_quickstart
     update_nginx_ubus_module # 更新 nginx-mod-ubus 模块
     check_default_settings
     install_opkg_distfeeds
@@ -1195,10 +1196,6 @@ main() {
     install_speedtest_cli
     fix_openssl_ktls
     fix_opkg_check
-    update_package "runc" "releases" "v1.2.6"
-    update_package "containerd" "releases" "v1.7.27"
-    update_package "docker" "tags" "v28.2.2"
-    update_package "dockerd" "releases" "v28.2.2"
     # apply_hash_fixes # 调用哈希修正函数
 }
 
