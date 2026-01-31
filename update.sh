@@ -619,7 +619,6 @@ update_package() {
     fi
     local mk_path="$dir/Makefile"
     if [ -f "$mk_path" ]; then
-        # 提取repo
         local PKG_REPO=$(grep -oE "^PKG_GIT_URL.*github.com(/[-_a-zA-Z0-9]{1,}){2}" "$mk_path" | awk -F"/" '{print $(NF - 1) "/" $NF}')
         if [ -z "$PKG_REPO" ]; then
             PKG_REPO=$(grep -oE "^PKG_SOURCE_URL.*github.com(/[-_a-zA-Z0-9]{1,}){2}" "$mk_path" | awk -F"/" '{print $(NF - 1) "/" $NF}')
@@ -636,13 +635,45 @@ update_package() {
         if [ -n "$3" ]; then
             PKG_VER="$3"
         fi
-        local COMMIT_SHA
-        if ! COMMIT_SHA=$(curl -fsSL "https://api.github.com/repos/$PKG_REPO/tags" | jq -r '.[] | select(.name=="'$PKG_VER'") | .commit.sha' | cut -c1-7); then
-            echo "错误：从 https://api.github.com/repos/$PKG_REPO/tags 获取提交哈希失败" >&2
-            return 1
-        fi
-        if [ -n "$COMMIT_SHA" ]; then
-            sed -i 's/^PKG_GIT_SHORT_COMMIT:=.*/PKG_GIT_SHORT_COMMIT:='$COMMIT_SHA'/g' "$mk_path"
+        local PKG_VER_CLEAN
+        PKG_VER_CLEAN=$(echo "$PKG_VER" | sed 's/^v//')
+        if grep -q "^PKG_GIT_SHORT_COMMIT:=" "$mk_path"; then
+            local PKG_GIT_URL_RAW
+            PKG_GIT_URL_RAW=$(awk -F"=" '/^PKG_GIT_URL:=/ {print $NF}' "$mk_path")
+            local PKG_GIT_REF_RAW
+            PKG_GIT_REF_RAW=$(awk -F"=" '/^PKG_GIT_REF:=/ {print $NF}' "$mk_path")
+
+            if [ -z "$PKG_GIT_URL_RAW" ] || [ -z "$PKG_GIT_REF_RAW" ]; then
+                echo "错误：$mk_path 缺少 PKG_GIT_URL 或 PKG_GIT_REF，无法更新 PKG_GIT_SHORT_COMMIT" >&2
+                return 1
+            fi
+
+            local PKG_GIT_REF_RESOLVED
+            PKG_GIT_REF_RESOLVED=$(echo "$PKG_GIT_REF_RAW" | sed "s/\$(PKG_VERSION)/$PKG_VER_CLEAN/g; s/\${PKG_VERSION}/$PKG_VER_CLEAN/g")
+
+            local PKG_GIT_REF_TAG="${PKG_GIT_REF_RESOLVED#refs/tags/}"
+
+            local COMMIT_SHA
+            local LS_REMOTE_OUTPUT
+            LS_REMOTE_OUTPUT=$(git ls-remote "https://$PKG_GIT_URL_RAW" "refs/tags/${PKG_GIT_REF_TAG}" "refs/tags/${PKG_GIT_REF_TAG}^{}" 2>/dev/null)
+            COMMIT_SHA=$(echo "$LS_REMOTE_OUTPUT" | awk '/\^\{\}$/ {print $1; exit}')
+            if [ -z "$COMMIT_SHA" ]; then
+                COMMIT_SHA=$(echo "$LS_REMOTE_OUTPUT" | awk 'NR==1{print $1}')
+            fi
+            if [ -z "$COMMIT_SHA" ]; then
+                COMMIT_SHA=$(git ls-remote "https://$PKG_GIT_URL_RAW" "${PKG_GIT_REF_RESOLVED}^{}" 2>/dev/null | awk 'NR==1{print $1}')
+            fi
+            if [ -z "$COMMIT_SHA" ]; then
+                COMMIT_SHA=$(git ls-remote "https://$PKG_GIT_URL_RAW" "$PKG_GIT_REF_RESOLVED" 2>/dev/null | awk 'NR==1{print $1}')
+            fi
+            if [ -z "$COMMIT_SHA" ]; then
+                echo "错误：无法从 https://$PKG_GIT_URL_RAW 获取 $PKG_GIT_REF_RESOLVED 的提交哈希" >&2
+                return 1
+            fi
+
+            local SHORT_COMMIT
+            SHORT_COMMIT=$(echo "$COMMIT_SHA" | cut -c1-7)
+            sed -i "s/^PKG_GIT_SHORT_COMMIT:=.*/PKG_GIT_SHORT_COMMIT:=$SHORT_COMMIT/g" "$mk_path"
         fi
         PKG_VER=$(echo "$PKG_VER" | grep -oE "[\.0-9]{1,}")
 
@@ -1195,11 +1226,12 @@ main() {
     install_speedtest_cli
     fix_openssl_ktls
     fix_opkg_check
-    update_package "runc" "releases" "v1.2.6"
-    update_package "containerd" "releases" "v1.7.27"
-    update_package "docker" "tags" "v28.2.2"
-    update_package "dockerd" "releases" "v28.2.2"
+    update_package "runc" "releases" "v1.3.3"
+    update_package "containerd" "releases" "v1.7.28"
+    update_package "docker" "tags" "v28.5.2"
+    update_package "dockerd" "releases" "v28.5.2"
     # apply_hash_fixes # 调用哈希修正函数
+    [ -f $BUILD_DIR/package/libs/libubox/Makefile ] && sed -i 's/TARGET_CFLAGS +=/TARGET_CFLAGS += -Wno-error=format-nonliteral/g' $BUILD_DIR/package/libs/libubox/Makefile || echo 'patch libubox failed'
 }
 
 main "$@"

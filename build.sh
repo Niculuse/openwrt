@@ -37,6 +37,13 @@ remove_uhttpd_dependency() {
             echo "Removed uhttpd (luci-light) dependency as luci-app-quickfile (nginx) is enabled."
         fi
     fi
+
+    if grep -q "CONFIG_PACKAGE_luci-nginx=y" "$config_path"; then
+        if [ -f "$luci_makefile_path" ]; then
+            sed -i '/luci-light/d' "$luci_makefile_path"
+            echo "Removed uhttpd (luci-light) dependency as luci-app-quickfile (nginx) is enabled."
+        fi
+    fi
 }
 
 # 应用配置文件
@@ -95,7 +102,7 @@ make download -j$(($(nproc) * 4))
 [ "$EUID" -eq 0 ] && export FORCE_UNSAFE_CONFIGURE=1
 rm -rf ./package/feeds/luci/luci-app-attendedsysupgrade
 rm -rf ./feeds/luci/applications/luci-app-attendedsysupgrade
-make -j$(($(nproc) + 1)) || make -j1 V=s
+make -j$(($(nproc) + 1))  || make -j1 V=s
 
 FIRMWARE_DIR="$BASE_PATH/firmware"
 \rm -rf "$FIRMWARE_DIR"
