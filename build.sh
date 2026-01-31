@@ -27,6 +27,7 @@ read_ini_by_key() {
 
 # 移除 uhttpd 依赖
 # 当启用luci-app-quickfile插件时，表示启动nginx，所以移除luci对uhttp(luci-light)的依赖
+# 当lighttpd启用时，移除uhttpd
 remove_uhttpd_dependency() {
     local config_path="$BASE_PATH/$BUILD_DIR/.config"
     local luci_makefile_path="$BASE_PATH/$BUILD_DIR/feeds/luci/collections/luci/Makefile"
@@ -35,6 +36,12 @@ remove_uhttpd_dependency() {
         if [ -f "$luci_makefile_path" ]; then
             sed -i '/luci-light/d' "$luci_makefile_path"
             echo "Removed uhttpd (luci-light) dependency as luci-app-quickfile (nginx) is enabled."
+        fi
+    fi
+    if grep -q "CONFIG_PACKAGE_lighttpd=y" "$config_path"; then
+        if [ -f "$luci_makefile_path" ]; then
+            sed -i '/luci-light/d' "$luci_makefile_path"
+            echo "Removed uhttpd (luci-light) dependency as lighttpd is enabled."
         fi
     fi
 }
