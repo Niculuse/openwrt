@@ -39,9 +39,9 @@ remove_uhttpd_dependency() {
     fi
 
     if grep -q "CONFIG_PACKAGE_lighttpd=y" "$config_path"; then
-        if [ -f "$luci_makefile_path" ]; then
-            sed -i '/luci-light/d' "$luci_makefile_path"
-            echo "Removed uhttpd (luci-light) dependency as luci-app-quickfile (nginx) is enabled."
+        local patch_file="99-remove-uhttpd.sh"
+        if [ -f "$BASE_PATH/patches/$patch_file" ]; then
+            install -Dm544 "$BASE_PATH/patches/$patch_file" "$BUILD_DIR/package/base-files/files/etc/uci-defaults/$patch_file"
         fi
     fi
 }
