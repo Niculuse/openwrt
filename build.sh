@@ -37,6 +37,13 @@ remove_uhttpd_dependency() {
             echo "Removed uhttpd (luci-light) dependency as luci-app-quickfile (nginx) is enabled."
         fi
     fi
+
+    if grep -q "CONFIG_PACKAGE_lighttpd=y" "$config_path"; then
+        if [ -f "$luci_makefile_path" ]; then
+            sed -i '/luci-light/d' "$luci_makefile_path"
+            echo "Removed uhttpd (luci-light) dependency as luci-app-quickfile (nginx) is enabled."
+        fi
+    fi
 }
 
 # 应用配置文件
