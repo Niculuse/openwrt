@@ -233,7 +233,6 @@ install_feeds() {
         # 检查是否为目录并且不以 .tmp 结尾，并且不是软链接
         if [ -d "$dir" ] && [[ ! "$dir" == *.tmp ]] && [[ ! "$dir" == *.index ]] && [[ ! "$dir" == *.targetindex ]]; then
             if [[ $(basename "$dir") == "small8" ]]; then
-                install_small8
                 install_fullconenat
             else
                 ./scripts/feeds install -f -ap $(basename "$dir")
