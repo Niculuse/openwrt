@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5a756df2-06cf-4581-a248-b35be69363aa" name="更改" comment="build: Remove luci-app-attendedsysupgrade and update gitignore&#10;&#10;A new function `remove_attendedsysupgrade` has been added to `update.sh`. This function identifies and removes `luci-app-attendedsysupgrade` from LuCI collection Makefiles during the update process.&#10;&#10;The `.gitignore` file has been updated to ignore `compilecfg` and `deconfig` files for new device targets: `jdcloud_ax1800pro`, `jdcloud_ax3000`, and `link_nn6000v2`. This prevents build-related configuration files for these devices from being tracked by Git.&#10;&#10;# Conflicts:&#10;#&#9;.gitignore" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="32HtmyHyDZiB7NB26nq5Y2qFWwR" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Users/niklaus/Documents/openwrt/.github/workflows",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/.github/workflows" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/patches" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/wrt_core/deconfig" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="5a756df2-06cf-4581-a248-b35be69363aa" name="更改" comment="" />
+      <created>1757089488343</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1757089488343</updated>
+      <workItem from="1757089490410" duration="374000" />
+      <workItem from="1757168166436" duration="1238000" />
+      <workItem from="1757241370856" duration="563000" />
+      <workItem from="1757412514313" duration="946000" />
+      <workItem from="1757419893417" duration="5584000" />
+      <workItem from="1757586371613" duration="4093000" />
+      <workItem from="1757618445150" duration="8383000" />
+      <workItem from="1757691395243" duration="7023000" />
+      <workItem from="1757943451598" duration="1843000" />
+      <workItem from="1758154561794" duration="3581000" />
+      <workItem from="1758423032442" duration="5712000" />
+      <workItem from="1760708344982" duration="1844000" />
+      <workItem from="1762948366347" duration="2169000" />
+      <workItem from="1762985680990" duration="1432000" />
+      <workItem from="1762994638750" duration="1517000" />
+      <workItem from="1763199971082" duration="539000" />
+      <workItem from="1763203125943" duration="5072000" />
+      <workItem from="1763557103258" duration="280000" />
+      <workItem from="1763562294212" duration="150000" />
+      <workItem from="1763803658993" duration="348000" />
+      <workItem from="1763809708598" duration="292000" />
+      <workItem from="1767357250188" duration="3918000" />
+      <workItem from="1771602391902" duration="3112000" />
+      <workItem from="1771762734792" duration="3203000" />
+      <workItem from="1771781166031" duration="4569000" />
+      <workItem from="1774016809142" duration="2962000" />
+      <workItem from="1778354539555" duration="3109000" />
+    </task>
+    <task id="LOCAL-00001" summary="build(libwrt): Update LiBwrt repository branch to k6.12-nss&#10;&#10;# Conflicts:&#10;#&#9;compilecfg/zn_m2_libwrt.ini">
+      <option name="closed" value="true" />
+      <created>1759227024884</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1759227024884</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.config" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+        <option value="Space.CommitStatus" />
+      </list>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="build(libwrt): Update LiBwrt repository branch to k6.12-nss&#10;&#10;# Conflicts:&#10;#&#9;compilecfg/zn_m2_libwrt.ini" />
+    <option name="LAST_COMMIT_MESSAGE" value="build(libwrt): Update LiBwrt repository branch to k6.12-nss&#10;&#10;# Conflicts:&#10;#&#9;compilecfg/zn_m2_libwrt.ini" />
+  </component>
+</project>
