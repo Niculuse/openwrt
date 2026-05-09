@@ -51,7 +51,6 @@ main() {
     update_golang
     change_dnsmasq2full
     fix_mk_def_depends
-
     update_default_lan_addr
     remove_something_nss_kmod
     update_affinity_script
@@ -70,15 +69,11 @@ main() {
     update_dnsmasq_conf
     add_backup_info_to_sysupgrade
     update_mosdns_deconfig
-    fix_quickstart
     update_oaf_deconfig
     add_timecontrol
-    add_quickfile
-    update_lucky
     fix_rust_compile_error
-    update_smartdns
     update_diskman
-    # update_dockerman
+    update_dockerman
     set_nginx_default_config
     update_uwsgi_limit_as
     update_argon
