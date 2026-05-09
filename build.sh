@@ -188,6 +188,9 @@ apply_config() {
     cat "$BASE_PATH/deconfig/docker_deps.config" >> "$BASE_PATH/../$BUILD_DIR/.config"
 
     cat "$BASE_PATH/deconfig/proxy.config" >> "$BASE_PATH/../$BUILD_DIR/.config"
+
+    cat "$BASE_PATH/deconfig/busybox.config" >> "$BASE_PATH/../$BUILD_DIR/.config"
+
 }
 
 REPO_URL=$(read_ini_by_key "REPO_URL")
