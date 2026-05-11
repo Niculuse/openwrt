@@ -167,10 +167,10 @@ remove_uhttpd_dependency() {
     local config_path="$BASE_PATH/../$BUILD_DIR/.config"
     local luci_makefile_path="$BASE_PATH/../$BUILD_DIR/feeds/luci/collections/luci/Makefile"
 
-    if grep -q "CONFIG_PACKAGE_luci-app-quickfile=y" "$config_path"; then
+    if grep -q "CONFIG_PACKAGE_luci-app-quickfile=y" "$config_path" || grep -q "CONFIG_PACKAGE_luci-nginx=y" "$config_path"; then
         if [ -f "$luci_makefile_path" ]; then
             sed -i '/luci-light/d' "$luci_makefile_path"
-            echo "Removed uhttpd (luci-light) dependency as luci-app-quickfile (nginx) is enabled."
+            echo "Removed uhttpd (luci-light) dependency as nginx is enabled."
         fi
     fi
 }
@@ -188,6 +188,8 @@ apply_config() {
     cat "$BASE_PATH/deconfig/docker_deps.config" >> "$BASE_PATH/../$BUILD_DIR/.config"
 
     cat "$BASE_PATH/deconfig/proxy.config" >> "$BASE_PATH/../$BUILD_DIR/.config"
+
+    cat "$BASE_PATH/deconfig/busybox.config" >> "$BASE_PATH/../$BUILD_DIR/.config"
 }
 
 REPO_URL=$(read_ini_by_key "REPO_URL")
