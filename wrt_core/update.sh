@@ -70,10 +70,10 @@ main() {
     update_dnsmasq_conf
     add_backup_info_to_sysupgrade
     update_mosdns_deconfig
-    fix_quickstart
+#    fix_quickstart
     update_oaf_deconfig
     add_timecontrol
-    add_quickfile
+#    add_quickfile
     update_lucky
     fix_rust_compile_error
     update_smartdns
