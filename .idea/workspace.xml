@@ -40,7 +40,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/niklaus/Documents/openwrt/wrt_core/deconfig",
+    "last_opened_file_path": "/Users/niklaus/Documents/openwrt/.github/workflows",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -52,9 +52,9 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/wrt_core/deconfig" />
       <recent name="$PROJECT_DIR$/.github/workflows" />
       <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/wrt_core/deconfig" />
       <recent name="$PROJECT_DIR$/patches" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
