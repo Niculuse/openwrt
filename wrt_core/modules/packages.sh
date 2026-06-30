@@ -126,6 +126,46 @@ sync_sparse_packages_to_feed_dir() {
     fi
 }
 
+sync_repo_root_package_to_feed_dir() {
+    local repo_url="$1"
+    local repo_branch="$2"
+    local target_dir="$3"
+    local repo_label="$4"
+    local package_name="$5"
+    local tmp_dir
+    local clone_args=(clone --depth 1 --filter=blob:none)
+
+    tmp_dir=$(mktemp -d)
+
+    if [ -n "$repo_branch" ]; then
+        clone_args+=(-b "$repo_branch")
+    fi
+
+    clone_args+=("$repo_url" "$tmp_dir")
+
+    echo "正在从 $repo_label 同步单包仓库..."
+    if ! git_retry "${clone_args[@]}"; then
+        echo "错误：从 $repo_url 克隆 $repo_label 失败" >&2
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    if [ ! -f "$tmp_dir/Makefile" ]; then
+        echo "错误：$repo_label 仓库根目录缺少 OpenWrt 软件包 Makefile" >&2
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+
+    rm -rf "$tmp_dir/.git"
+    rm -rf "$target_dir/$package_name"
+
+    if ! mv "$tmp_dir" "$target_dir/$package_name"; then
+        echo "错误：无法将 $repo_label 移动到 $target_dir/$package_name" >&2
+        rm -rf "$tmp_dir"
+        return 1
+    fi
+}
+
 register_local_feed_source() {
     local custom_feed_dir="$1"
     local feeds_path="$2"
@@ -162,6 +202,7 @@ install_custom_feed() {
         luci-app-quickstart luci-app-store luci-app-homeproxy luci-app-mosdns
         luci-app-passwall nikki luci-app-nikki mihomo-meta
         open-app-filter luci-app-oaf lucky luci-app-lucky luci-app-easytier
+        luci-app-emmc-health
     )
     local custom_feed_sources=()
     local missing_feed_dirs=()
@@ -207,6 +248,11 @@ install_custom_feed() {
         fi
     done
 
+    if ! sync_repo_root_package_to_feed_dir "https://github.com/adminchenyu/eMMC-Health.git" "main" "$custom_feed_dir" "adminchenyu/eMMC-Health" "luci-app-emmc-health"; then
+        rm -rf "$custom_feed_dir"
+        return 1
+    fi
+
     register_local_feed_source "$custom_feed_dir" "$feeds_path"
 
     echo "正在更新 $custom_feed_name 本地 feed 索引..."
@@ -228,7 +274,7 @@ verify_custom_feed_installed_paths() {
     local custom_feed_package_dir
     local required_package_dirs=(
         luci-app-adguardhome luci-app-mosdns v2ray-geodata luci-app-easytier
-        luci-app-passwall nikki luci-app-nikki mihomo-meta
+        luci-app-passwall nikki luci-app-nikki mihomo-meta luci-app-emmc-health
     )
     local missing_package_dirs=()
 
