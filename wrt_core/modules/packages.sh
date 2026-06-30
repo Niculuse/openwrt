@@ -166,6 +166,21 @@ sync_repo_root_package_to_feed_dir() {
     fi
 }
 
+fix_emmc_health_luci_js_deps() {
+    local package_dir="$1"
+    local makefile_path="$package_dir/Makefile"
+
+    if [ ! -f "$makefile_path" ]; then
+        echo "错误：luci-app-emmc-health Makefile 不存在：$makefile_path" >&2
+        return 1
+    fi
+
+    if grep -q "luci-js-deps" "$makefile_path"; then
+        sed -i '/^[[:space:]]*DEPENDS:=/ s/[[:space:]]*+luci-js-deps//g' "$makefile_path"
+        echo "已移除 luci-app-emmc-health 的 luci-js-deps 兼容性依赖。"
+    fi
+}
+
 register_local_feed_source() {
     local custom_feed_dir="$1"
     local feeds_path="$2"
@@ -249,6 +264,11 @@ install_custom_feed() {
     done
 
     if ! sync_repo_root_package_to_feed_dir "https://github.com/adminchenyu/eMMC-Health.git" "main" "$custom_feed_dir" "adminchenyu/eMMC-Health" "luci-app-emmc-health"; then
+        rm -rf "$custom_feed_dir"
+        return 1
+    fi
+
+    if ! fix_emmc_health_luci_js_deps "$custom_feed_dir/luci-app-emmc-health"; then
         rm -rf "$custom_feed_dir"
         return 1
     fi
