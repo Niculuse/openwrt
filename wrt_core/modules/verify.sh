@@ -22,4 +22,3 @@ verify_custom_feed_installed_paths() {
         return 1
     fi
 }
-

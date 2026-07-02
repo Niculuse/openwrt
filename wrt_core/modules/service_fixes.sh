@@ -270,7 +270,7 @@ fix_pbr_ip_forward() {
     echo "正在应用 PBR IP Forward 修复..."
     # strict_enforcement 生效前先确认 pbr 已启用。
     sed -i 's/\[ -n "\$strict_enforcement" \] && \[ "\$(cat \/proc\/sys\/net\/ipv4\/ip_forward)"/\[ -n "\$enabled" \] \&\& \[ -n "\$strict_enforcement" \] \&\& \[ "\$(cat \/proc\/sys\/net\/ipv4\/ip_forward)"/' "$pbr_init_script"
-    
+
     if grep -q '\[ -n "$enabled" \] && \[ -n "$strict_enforcement" \]' "$pbr_init_script"; then
         echo "PBR IP Forward 修复应用成功"
         return 0
@@ -279,7 +279,6 @@ fix_pbr_ip_forward() {
         return 1
     fi
 }
-
 
 fix_quectel_cm() {
     local makefile_path="$BUILD_DIR/package/feeds/packages/quectel-cm/Makefile"
@@ -372,4 +371,3 @@ update_uwsgi_limit_as() {
         sed -i 's/^limit-as = .*/limit-as = 8192/g' "$webui_ini"
     fi
 }
-

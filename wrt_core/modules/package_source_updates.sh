@@ -128,23 +128,23 @@ update_diskman() {
 _sync_luci_lib_docker() {
     local lib_path="$BUILD_DIR/feeds/luci/libs/luci-lib-docker"
     local repo_url="https://github.com/lisaac/luci-lib-docker.git"
-    
+
     if [ ! -d "$lib_path" ]; then
         echo "正在同步 luci-lib-docker..."
         mkdir -p "$BUILD_DIR/feeds/luci/libs" || return
         cd "$BUILD_DIR/feeds/luci/libs" || return
-        
+
         if ! git_retry clone --filter=blob:none --no-checkout "$repo_url" luci-lib-docker-tmp; then
             echo "错误：从 $repo_url 克隆 luci-lib-docker 仓库失败" >&2
             exit 1
         fi
         cd luci-lib-docker-tmp || return
-        
+
         git_retry sparse-checkout init --cone
         git_retry sparse-checkout set collections/luci-lib-docker || return
-        
+
         git_retry checkout --quiet
-        
+
         mv collections/luci-lib-docker ../luci-lib-docker || return
         cd .. || return
         \rm -rf luci-lib-docker-tmp
@@ -161,7 +161,7 @@ update_dockerman() {
     if [ -d "$path" ]; then
         echo "正在更新 dockerman..."
         _sync_luci_lib_docker || return
-        
+
         cd "$BUILD_DIR/feeds/luci/applications" || return
         \rm -rf "luci-app-dockerman"
 

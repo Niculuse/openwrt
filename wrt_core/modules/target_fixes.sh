@@ -238,4 +238,3 @@ fix_rust_compile_error() {
         sed -i 's/download-ci-llvm=true/download-ci-llvm=false/g' "$BUILD_DIR/feeds/packages/lang/rust/Makefile"
     fi
 }
-

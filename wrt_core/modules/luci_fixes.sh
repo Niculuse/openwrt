@@ -8,7 +8,6 @@ set_build_signature() {
     fi
 }
 
-
 update_menu_location() {
     local samba4_path="$BUILD_DIR/feeds/luci/applications/luci-app-samba4/root/usr/share/luci/menu.d/luci-app-samba4.json"
     if [ -d "$(dirname "$samba4_path")" ] && [ -f "$samba4_path" ]; then
@@ -37,4 +36,3 @@ update_nginx_ubus_module() {
         echo "错误：未找到 $makefile_path 文件，无法更新 nginx-mod-ubus 模块。" >&2
     fi
 }
-
