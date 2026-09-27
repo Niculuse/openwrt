@@ -166,33 +166,6 @@ jobs:
           echo "Firmware file count: $(ls -1 ./firmware 2>/dev/null | wc -l)"
           echo "===================================================="
 
-      - name: Package Kmods
-        run: |
-          if [ ! -d "./action_build/bin" ]; then
-            echo "kmod source directory not found: ./action_build/bin" >&2
-            exit 1
-          fi
-
-          KMOD_LIST=$(mktemp)
-          trap 'rm -f "$KMOD_LIST"' EXIT
-
-          (
-            cd ./action_build/bin
-            find . -type f \( -name "kmod*.ipk" -o -name "kmod*.apk" \) -print | sort > "$KMOD_LIST"
-          )
-
-          if [ ! -s "$KMOD_LIST" ]; then
-            echo "No kmod packages found under ./action_build/bin" >&2
-            exit 1
-          fi
-
-          kmod_count=$(wc -l < "$KMOD_LIST" | tr -d '[:space:]')
-          archive_name="kmods_${{ matrix.model }}_${KVER:-unknown-kernel}_${BUILD_DATE}.tar.gz"
-          tar -C ./action_build/bin -czf "$archive_name" -T "$KMOD_LIST"
-
-          echo "KMOD_ARCHIVE=$archive_name" >> "$GITHUB_ENV"
-          echo "Packaged $kmod_count kmod packages into $archive_name"
-
       - name: Prepare Release Body
         run: |
           echo "云编译发布 - 机型：${{ matrix.model }}" > release_body.txt
