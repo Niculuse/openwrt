@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5a756df2-06cf-4581-a248-b35be69363aa" name="更改" comment="build: Remove luci-app-attendedsysupgrade and update gitignore&#10;&#10;A new function `remove_attendedsysupgrade` has been added to `update.sh`. This function identifies and removes `luci-app-attendedsysupgrade` from LuCI collection Makefiles during the update process.&#10;&#10;The `.gitignore` file has been updated to ignore `compilecfg` and `deconfig` files for new device targets: `jdcloud_ax1800pro`, `jdcloud_ax3000`, and `link_nn6000v2`. This prevents build-related configuration files for these devices from being tracked by Git.&#10;&#10;# Conflicts:&#10;#&#9;.gitignore">
-      <change beforePath="$PROJECT_DIR$/wrt_core/modules/custom_feed.sh" beforeDir="false" afterPath="$PROJECT_DIR$/wrt_core/modules/custom_feed.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/wrt_core/modules/verify.sh" beforeDir="false" afterPath="$PROJECT_DIR$/wrt_core/modules/verify.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/release_wrt.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/release_wrt.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,7 +99,7 @@
       <workItem from="1771781166031" duration="4569000" />
       <workItem from="1774016809142" duration="2962000" />
       <workItem from="1778354539555" duration="3896000" />
-      <workItem from="1790477090956" duration="275000" />
+      <workItem from="1790477090956" duration="905000" />
     </task>
     <task id="LOCAL-00001" summary="build(libwrt): Update LiBwrt repository branch to k6.12-nss&#10;&#10;# Conflicts:&#10;#&#9;compilecfg/zn_m2_libwrt.ini">
       <option name="closed" value="true" />
