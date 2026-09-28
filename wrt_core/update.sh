@@ -100,6 +100,7 @@ stage_pre_install_source_fixes() {
     add_timecontrol
 #    add_quickfile
 #    update_lucky
+    update_openlist
     fix_rust_compile_error
     update_smartdns
     update_mwan3_fw4

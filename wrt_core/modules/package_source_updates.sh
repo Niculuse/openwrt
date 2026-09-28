@@ -213,6 +213,40 @@ update_dockerman() {
     fi
 }
 
+update_openlist() {
+    local path="$BUILD_DIR/feeds/packages/net/openlist"
+    local makefile="$path/Makefile"
+    local repo_url="https://github.com/OpenListTeam/OpenList.git"
+
+    if [ -d "$path" ]; then
+        echo "正在更新 openlist..."
+
+        local version
+        version="$(
+            git ls-remote --tags --refs "$repo_url" \
+            | sed -n 's#.*refs/tags/v\([0-9][0-9.]*\)$#\1#p' \
+            | sort -V \
+            | tail -n1
+        )"
+
+        if [ -z "$version" ]; then
+            echo "错误：无法获取 OpenList 最新版本" >&2
+            return 1
+        fi
+
+        echo "OpenList 最新版本: $version"
+
+        sed -i \
+            "s#^PKG_VERSION:=.*#PKG_VERSION:=$version#" \
+            "$makefile"
+
+        sed -i \
+            's#^PKG_SOURCE_URL:=.*#PKG_SOURCE_URL:=https://github.com/OpenListTeam/OpenList/archive/refs/tags/v$(PKG_VERSION)#' \
+            "$makefile"
+
+        echo "openlist 更新完成: v$version"
+    fi
+}
 
 add_quickfile() {
     local repo_url="https://github.com/sbwml/luci-app-quickfile.git"
