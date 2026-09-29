@@ -212,40 +212,94 @@ update_dockerman() {
         echo "dockerman 更新完成"
     fi
 }
-
 update_openlist() {
     local path="$BUILD_DIR/feeds/packages/net/openlist"
     local makefile="$path/Makefile"
     local repo_url="https://github.com/OpenListTeam/OpenList.git"
 
-    if [ -d "$path" ]; then
-        echo "正在更新 openlist..."
-
-        local version
-        version="$(
-            git ls-remote --tags --refs "$repo_url" \
-            | sed -n 's#.*refs/tags/v\([0-9][0-9.]*\)$#\1#p' \
-            | sort -V \
-            | tail -n1
-        )"
-
-        if [ -z "$version" ]; then
-            echo "错误：无法获取 OpenList 最新版本" >&2
-            return 1
-        fi
-
-        echo "OpenList 最新版本: $version"
-
-        sed -i \
-            "s#^PKG_VERSION:=.*#PKG_VERSION:=$version#" \
-            "$makefile"
-
-        sed -i \
-            's#^PKG_SOURCE_URL:=.*#PKG_SOURCE_URL:=https://github.com/OpenListTeam/OpenList/archive/refs/tags/v$(PKG_VERSION)#' \
-            "$makefile"
-
-        echo "openlist 更新完成: v$version"
+    if [ ! -d "$path" ]; then
+        return 0
     fi
+
+    echo "正在更新 openlist..."
+
+    # 获取最新稳定版 semver tag，例如 v4.2.6
+    local latest_tag
+    latest_tag="$(
+        git_retry ls-remote --tags --refs "$repo_url" 'v[0-9]*.[0-9]*.[0-9]*' |
+        awk '{print $2}' |
+        sed 's#refs/tags/v##' |
+        sort -V |
+        tail -n1
+    )" || {
+        echo "错误：获取 OpenList 最新版本失败" >&2
+        return 1
+    }
+
+    if [ -z "$latest_tag" ]; then
+        echo "错误：未找到 OpenList 稳定版本 tag" >&2
+        return 1
+    fi
+
+    local current_version
+    current_version="$(
+        sed -n 's/^PKG_VERSION:=//p' "$makefile" |
+        head -n1
+    )"
+
+    echo "当前版本：${current_version:-unknown}"
+    echo "最新版本：$latest_tag"
+
+    if [ "$current_version" = "$latest_tag" ]; then
+        echo "OpenList 已是最新版本，跳过更新"
+        return 0
+    fi
+
+    local source_url="https://github.com/OpenListTeam/OpenList/archive/refs/tags/"
+    local source_file="v${latest_tag}.tar.gz"
+    local source_path="$BUILD_DIR/dl/$source_file"
+
+    # 下载对应版本源码
+    mkdir -p "$BUILD_DIR/dl"
+
+    echo "下载 OpenList $latest_tag..."
+    if ! curl -L --fail --retry 2 --connect-timeout 10 \
+        -o "$source_path" \
+        "${source_url}${source_file}"; then
+        echo "错误：下载 OpenList $latest_tag 失败" >&2
+        rm -f "$source_path"
+        return 1
+    fi
+
+    # 计算 SHA256
+    local pkg_hash
+    pkg_hash="$(sha256sum "$source_path" | awk '{print $1}')" || {
+        echo "错误：计算 OpenList SHA256 失败" >&2
+        return 1
+    }
+
+    echo "SHA256: $pkg_hash"
+
+    # 更新 Makefile
+    sed -i \
+        -e "s/^PKG_VERSION:=.*/PKG_VERSION:=${latest_tag}/" \
+        -e "s#^PKG_SOURCE:=.*#PKG_SOURCE:=v\$(PKG_VERSION).tar.gz#" \
+        -e "s#^PKG_SOURCE_URL:=.*#PKG_SOURCE_URL:=${source_url}#" \
+        -e "s/^PKG_HASH:=.*/PKG_HASH:=${pkg_hash}/" \
+        "$makefile"
+
+    # 如果原 Makefile 没有 PKG_HASH，则补到 PKG_SOURCE_URL 后面
+    if ! grep -q '^PKG_HASH:=' "$makefile"; then
+        sed -i \
+            "/^PKG_SOURCE_URL:=/a PKG_HASH:=${pkg_hash}" \
+            "$makefile"
+    fi
+
+    echo "OpenList 更新完成：$current_version -> $latest_tag"
+    echo "源码：${source_url}${source_file}"
+    echo "SHA256：$pkg_hash"
+
+    cd "$BUILD_DIR" || return 1
 }
 
 add_quickfile() {
