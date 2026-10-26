@@ -22,7 +22,7 @@ fi
 
 FEEDS_CONF="feeds.conf.default"
 GOLANG_REPO="https://github.com/sbwml/packages_lang_golang"
-GOLANG_BRANCH="26.x"
+GOLANG_BRANCH="27.x"
 THEME_SET="argon"
 LAN_ADDR="192.168.1.1"
 
@@ -101,7 +101,7 @@ stage_pre_install_source_fixes() {
 #    add_quickfile
 #    update_lucky
     update_openlist
-    fix_rust_compile_error
+    # fix_rust_compile_error
     update_smartdns
     update_mwan3_fw4
     update_diskman
