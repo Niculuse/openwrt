@@ -213,6 +213,165 @@ update_dockerman() {
     fi
 }
 
+fix_openlist_frontend_hash() {
+    local path="$BUILD_DIR/feeds/packages/net/openlist"
+    local makefile="$path/Makefile"
+    local repo="OpenListTeam/OpenList-Frontend"
+
+    if [ ! -f "$makefile" ]; then
+        return 0
+    fi
+
+    echo "正在检查 OpenList 前端 SHA256..."
+
+    # 从 Makefile 获取版本及资源文件名
+    local version pkg_name asset_name
+    version="$(sed -n 's/^PKG_VERSION:=//p' "$makefile" | head -n1)"
+    pkg_name="$(sed -n 's/^PKG_NAME:=//p' "$makefile" | head -n1)"
+    asset_name="$(sed -n 's/^WEB_FILE:=//p' "$makefile" | head -n1)"
+
+    if [ -z "$version" ] || [ -z "$pkg_name" ] || [ -z "$asset_name" ]; then
+        echo "错误：无法解析 OpenList 前端版本或文件名" >&2
+        return 1
+    fi
+
+    # 展开 Makefile 变量
+    asset_name="${asset_name//'$(PKG_NAME)'/$pkg_name}"
+    asset_name="${asset_name//'$(PKG_VERSION)'/$version}"
+
+    if [[ "$asset_name" == *'$('* || "$asset_name" == */* ]]; then
+        echo "错误：无法解析资源文件名：$asset_name" >&2
+        return 1
+    fi
+
+    # 获取前端当前 HASH（不修改 PKG_HASH）
+    local old_hash
+    old_hash="$(
+        sed -n '/^define Download\/openlist-web$/,/^endef$/{
+            s/^[[:space:]]*HASH:=//p
+        }' "$makefile" | head -n1
+    )"
+
+    if [ -z "$old_hash" ]; then
+        echo "错误：未找到 Download/openlist-web 的 HASH" >&2
+        return 1
+    fi
+
+    local api_url="https://api.github.com/repos/$repo/releases/tags/v$version"
+    local download_url="https://github.com/$repo/releases/download/v$version/$asset_name"
+    local source_path="$BUILD_DIR/dl/$asset_name"
+
+    echo "前端版本：$version"
+    echo "资源文件：$asset_name"
+    echo "原 SHA256：$old_hash"
+
+    # 优先从 GitHub Release API 获取官方 SHA256
+    local official_hash="" release_json="" digest=""
+    local -a headers=(-H "Accept: application/vnd.github+json")
+
+    if [ -n "${GH_TOKEN:-${GITHUB_TOKEN:-}}" ]; then
+        headers+=(-H "Authorization: Bearer ${GH_TOKEN:-${GITHUB_TOKEN:-}}")
+    fi
+
+    if release_json="$(curl -fsSL --retry 2 --connect-timeout 10 \
+        --max-time 30 "${headers[@]}" "$api_url")"; then
+
+        # 确保 API 中确实存在对应资源
+        if ! jq -e --arg name "$asset_name" \
+            '.assets[]? | select(.name == $name)' \
+            >/dev/null <<< "$release_json"; then
+            echo "错误：官方 Release 中不存在 $asset_name" >&2
+            return 1
+        fi
+
+        digest="$(
+            jq -r --arg name "$asset_name" \
+                '.assets[]? | select(.name == $name) | .digest // empty' \
+                <<< "$release_json"
+        )" || return 1
+
+        if [ -n "$digest" ]; then
+            if [[ "$digest" != sha256:* ]] ||
+               [[ ! "${digest#sha256:}" =~ ^[0-9a-fA-F]{64}$ ]]; then
+                echo "错误：官方 digest 格式不正确：$digest" >&2
+                return 1
+            fi
+
+            official_hash="${digest#sha256:}"
+            echo "官方 SHA256：$official_hash"
+        else
+            echo "官方未提供 SHA256，改用下载文件计算"
+        fi
+    else
+        echo "警告：GitHub API 获取失败，改用下载文件计算" >&2
+    fi
+
+    mkdir -p "$BUILD_DIR/dl" || return 1
+
+    # 如果本地缓存与官方摘要一致，就无需重新下载
+    local new_hash=""
+    if [ -f "$source_path" ] && [ -n "$official_hash" ]; then
+        new_hash="$(sha256sum "$source_path" | awk '{print $1}')"
+        if [ "$new_hash" != "$official_hash" ]; then
+            new_hash=""
+        fi
+    fi
+
+    if [ -z "$new_hash" ]; then
+        local tmp_file
+        tmp_file="$(mktemp "${source_path}.tmp.XXXXXX")" || return 1
+
+        echo "下载 OpenList 前端资源..."
+
+        if ! curl -fL --retry 3 --connect-timeout 10 \
+            -o "$tmp_file" "$download_url"; then
+            echo "错误：前端资源下载失败" >&2
+            rm -f "$tmp_file"
+            return 1
+        fi
+
+        new_hash="$(sha256sum "$tmp_file" | awk '{print $1}')"
+
+        # 若 API 提供摘要，必须进行一致性校验
+        if [ -n "$official_hash" ] && [ "$new_hash" != "$official_hash" ]; then
+            echo "错误：下载文件与官方 SHA256 不一致" >&2
+            echo "官方：$official_hash" >&2
+            echo "实际：$new_hash" >&2
+            rm -f "$tmp_file"
+            return 1
+        fi
+
+        # 检查压缩包完整性
+        if ! tar -tzf "$tmp_file" >/dev/null; then
+            echo "错误：前端压缩包损坏" >&2
+            rm -f "$tmp_file"
+            return 1
+        fi
+
+        mv -f "$tmp_file" "$source_path" || {
+            rm -f "$tmp_file"
+            return 1
+        }
+    fi
+
+    echo "实际 SHA256：$new_hash"
+
+    if [ "$old_hash" = "$new_hash" ]; then
+        echo "OpenList 前端 SHA256 正确，无需修改"
+        return 0
+    fi
+
+    # 仅修改 Download/openlist-web 块中的 HASH
+    sed -i -E \
+        '/^define Download\/openlist-web$/,/^endef$/ s/^([[:space:]]*)HASH:=.*/\1HASH:='"$new_hash"'/' \
+        "$makefile" || return 1
+
+    echo "OpenList 前端 SHA256 修复完成"
+    echo "旧 HASH：$old_hash"
+    echo "新 HASH：$new_hash"
+    echo "缓存路径：$source_path"
+}
+
 update_openlist() {
     local path="$BUILD_DIR/feeds/packages/net/openlist"
     local makefile="$path/Makefile"
