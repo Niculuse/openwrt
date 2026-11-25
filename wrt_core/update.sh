@@ -101,6 +101,7 @@ stage_pre_install_source_fixes() {
 #    add_quickfile
 #    update_lucky
     update_openlist
+    fix_openlist_frontend_hash
     # fix_rust_compile_error
     update_smartdns
     update_mwan3_fw4
